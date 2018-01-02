@@ -44,7 +44,18 @@ macro(limix_config)
       add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
       add_definitions(-Dinline=__inline)
     endif()
+
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 endmacro(limix_config)
+
+macro(limix_process_default_dirs)
+    include_directories(src include)
+    add_subdirectory(src)
+    add_subdirectory(include)
+
+    define_sources(src SOURCES)
+    define_public_headers(include HEADERS)
+endmacro(limix_process_default_dirs)
 
 macro(limix_initialise)
     file(STRINGS ${CMAKE_HOME_DIRECTORY}/NAME PROJECT_NAME)
@@ -102,3 +113,10 @@ macro(limix_add_test NAME LIBRARY SOURCES)
     set_property(TEST test_${NAME} APPEND PROPERTY ENVIRONMENT
               "PATH=${MYPATH}")
 endmacro(limix_add_test)
+
+function(limix_convert_rel_to_full _FULL BASE_DIR REL)
+    foreach(SRC ${REL})
+        list(APPEND FULL "${BASE_DIR}/${SRC}")
+    endforeach()
+    set(${_FULL} ${FULL} PARENT_SCOPE)
+endfunction(limix_convert_rel_to_full)
