@@ -1,4 +1,4 @@
-# limix cmake module (1.0.5)
+# limix cmake module (1.0.6)
 #
 # Common configuration and handy functions for limix projects.
 #
@@ -79,6 +79,10 @@ macro(limix_initialise)
   file(STRINGS ${CMAKE_HOME_DIRECTORY}/WELCOME WELCOME)
   file(STRINGS ${CMAKE_HOME_DIRECTORY}/GITHUB_URL GITHUB_URL)
   set(LIMIX_CMAKE_ENVIRONMENT TRUE)
+  if( UNIX AND NOT BEOS )
+    # Used by check_symbol_exists:
+    set(CMAKE_REQUIRED_LIBRARIES m)
+  endif()
   display_welcome()
 endmacro(limix_initialise)
 
@@ -99,6 +103,29 @@ function(easy_static_install TARGET_NAME)
           ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
           LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endfunction(easy_static_install)
+
+function(limix_require_cmath_library)
+  include(CheckSymbolExists)
+
+  set(LIMIX_CMAKE_CMATH_LIBRARY "" PARENT_SCOPE)
+  if (WIN32)
+    return()
+  endif()
+
+  CHECK_SYMBOL_EXISTS(pow math.h HAVE_EXP)
+  if(NOT HAVE_EXP)
+    unset(HAVE_EXP)
+    CHECK_SYMBOL_EXISTS(exp math.h HAVE_EXP)
+    if(HAVE_EXP)
+      set(LIMIX_CMAKE_CMATH_LIBRARY "m" PARENT_SCOPE)
+    else()
+      set(msg "No pow() found. Please, check for standard math library for C.")
+      message(FATAL_ERROR "${msg}")
+    endif()
+  else()
+    set(LIMIX_CMAKE_CMATH_LIBRARY "m" PARENT_SCOPE)
+  endif()
+endfunction()
 
 function(add_library_type TYPE NAME VERSION SOURCES PUBLIC_HEADERS LIBS)
   if(TYPE MATCHES "STATIC")
