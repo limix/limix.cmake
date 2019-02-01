@@ -1,4 +1,4 @@
-# limix cmake module (1.1.0)
+# limix cmake module (1.1.1)
 #
 # Common configuration and handy functions for limix projects.
 #
@@ -62,6 +62,8 @@ macro(limix_config)
   endif()
 
   set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+
+  cmake_policy(SET CMP0075 NEW)
 endmacro(limix_config)
 
 macro(limix_process_default_dirs)
